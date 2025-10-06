@@ -1,0 +1,33 @@
+{
+  "name": "jharkhand-tourism-app",
+  "version": "1.0.0",
+  "description": "Complete tourism application for exploring Jharkhand - the Land of Forests",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
+    "server:dev": "cd server && npm run dev",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "create-shortcut": "powershell -ExecutionPolicy Bypass -File create-desktop-shortcut.ps1"
+  },
+  "keywords": [
+    "tourism",
+    "jharkhand",
+    "travel",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "Jharkhand Tourism Board",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "react-webcam": "^7.2.0"
+  }
+}
