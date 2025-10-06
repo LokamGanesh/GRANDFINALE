@@ -1,7 +1,7 @@
 {
-  "name": "jharkhand-tourism-app",
+  "name": "transliterate-bharat",
   "version": "1.0.0",
-  "description": "Complete tourism application for exploring Jharkhand - the Land of Forests",
+  "description": "Indian script transliteration application with OCR and camera support",
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
@@ -14,15 +14,17 @@
     "create-shortcut": "powershell -ExecutionPolicy Bypass -File create-desktop-shortcut.ps1"
   },
   "keywords": [
-    "tourism",
-    "jharkhand",
-    "travel",
+    "transliteration",
+    "indian-scripts",
+    "ocr",
     "react",
     "nodejs",
     "express",
-    "mongodb"
+    "devanagari",
+    "tamil",
+    "bengali"
   ],
-  "author": "Jharkhand Tourism Board",
+  "author": "Transliterate Bharat Team",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
