@@ -1,18 +1,18 @@
-# Jharkhand Tourism App
+# Transliterate Bharat
 
-A comprehensive web application showcasing the natural beauty, rich cultural heritage, and diverse wildlife of Jharkhand - the Land of Forests.
+A comprehensive web application for Indian script transliteration, enabling seamless transformation of text between different Indian scripts with precision and ease.
 
 ## Features
 
-- **Tourist Places**: Explore 50+ beautiful destinations across Jharkhand
-- **Experiences**: Discover unique cultural and adventure experiences
-- **Photo Gallery**: Browse stunning photography of landscapes and wildlife
+- **Text Transliteration**: Convert text between various Indian scripts (Devanagari, Tamil, Telugu, Bengali, Gujarati, etc.)
+- **Image Text Recognition**: Extract and transliterate text from images using OCR technology
+- **Camera Capture**: Real-time text capture and transliteration using device camera
+- **Multi-Language Support**: Support for multiple Indian languages and scripts
+- **User Authentication**: Secure user registration and login system
+- **History Tracking**: Keep track of your transliteration history
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Real-time Processing**: Instant transliteration with live preview
 - **Completely Free**: All features and services are completely free to use
-- **Smart Search**: Find places by name, location, or category
-- **Ratings & Reviews**: See ratings and detailed information for each destination
-- **Interactive Maps**: Get location details and coordinates
-- **Contact Support**: Easy contact form for inquiries and support
 
 ## Tech Stack
 
@@ -26,7 +26,8 @@ A comprehensive web application showcasing the natural beauty, rich cultural her
 ### Backend
 - **Node.js** - JavaScript runtime environment
 - **Express.js** - Fast, unopinionated web framework
-- **MongoDB** - NoSQL database (optional - works with in-memory data)
+- **Multer** - File upload handling for image processing
+- **OCR Libraries** - Text extraction from images
 - **CORS** - Cross-origin resource sharing middleware
 - **Body Parser** - Parse incoming request bodies
 
@@ -38,9 +39,10 @@ A comprehensive web application showcasing the natural beauty, rich cultural her
 
 ### Installation & Setup
 
-1. **Clone or Download the Project**
+1. **Clone the Project**
    ```bash
-   cd transliterateAPP
+   git clone https://github.com/LokamGanesh/projectSIH.git
+   cd projectSIH
    ```
 
 2. **Install All Dependencies**
@@ -73,21 +75,27 @@ A comprehensive web application showcasing the natural beauty, rich cultural her
 ## Project Structure
 
 ```
-transliterateAPP/
+projectSIH/
 ├── client/                    # React frontend application
 │   ├── public/                   # Static files
 │   ├── src/
 │   │   ├── components/           # React components
+│   │   │   ├── auth/            # Authentication components
 │   │   │   ├── layout/          # Navigation, Footer
-│   │   │   └── pages/           # Home, Places, Gallery, etc.
+│   │   │   ├── pages/           # Home, About pages
+│   │   │   └── transliteration/ # Transliteration components
 │   │   ├── context/             # React Context for state management
+│   │   ├── utils/               # Utility functions and translations
 │   │   ├── App.js               # Main App component
 │   │   └── App.css              # Global styles
 │   └── package.json
 ├── server/                     # Express backend server
 │   ├── routes/                   # API route handlers
-│   │   ├── tourism.js           # tourism stats and experiences
-│   │   └── places.js            # Tourist places data
+│   │   ├── transliteration.js   # Transliteration API endpoints
+│   │   ├── user.js              # User authentication
+│   │   └── users.js             # User management
+│   ├── utils/                   # Server utilities
+│   │   └── transliterator.js    # Transliteration logic
 │   ├── server.js                # Main server file
 │   └── package.json
 ├── start-app.bat              # Windows launcher script
@@ -98,44 +106,43 @@ transliterateAPP/
 
 ## API Endpoints
 
-### Tourism Information
-- `GET /api/tourism/stats` - Get tourism statistics
-- `GET /api/tourism/experiences` - Get all experiences
-- `GET /api/tourism/experiences/:id` - Get specific experience
-- `POST /api/tourism/contact` - Submit contact form
-- `GET /api/tourism/categories` - Get experience categories
+### Transliteration
+- `POST /api/transliteration/text` - Transliterate text between scripts
+- `POST /api/transliteration/image` - Extract and transliterate text from images
+- `GET /api/transliteration/languages` - Get supported languages and scripts
+- `GET /api/transliteration/history/:userId` - Get user's transliteration history
 
-### Places Information
-- `GET /api/places` - Get all places (with filtering)
-- `GET /api/places/:id` - Get specific place details
-- `GET /api/places/meta/categories` - Get place categories
-- `GET /api/places/meta/locations` - Get all locations
-- `GET /api/places/meta/featured` - Get featured places
+### User Management
+- `POST /api/users/register` - User registration
+- `POST /api/users/login` - User authentication
+- `GET /api/users/profile` - Get user profile
+- `PUT /api/users/profile` - Update user profile
 
 ## Key Features Explained
 
-### Tourist Places
-- Browse 50+ destinations including Betla National Park, Hundru Falls, Jagannath Temple
-- Filter by category (Wildlife, Waterfalls, Religious, Hill Stations)
-- Search by name, location, or description
-- View detailed information including timings, facilities, and highlights
+### Text Transliteration
+- Convert text between various Indian scripts including Devanagari, Tamil, Telugu, Bengali, Gujarati
+- Real-time transliteration with live preview
+- Support for multiple input methods and keyboard layouts
+- Accurate script conversion with proper character mapping
 
-### Experiences
-- Wildlife safaris and Nature photography
-- Tribal culture tours and heritage walks
-- Adventure activities and trekking
-- All experiences are completely free
+### Image Text Recognition
+- Upload images containing Indian script text
+- Advanced OCR technology for text extraction
+- Automatic transliteration of extracted text
+- Support for various image formats (JPG, PNG, etc.)
 
-### Photo Gallery
-- High-quality photos of Jharkhand's natural beauty
-- Interactive image viewer with descriptions
-- Categories include wildlife, waterfalls, temples, and landscapes
+### Camera Capture
+- Real-time camera integration for text capture
+- Instant text recognition and transliteration
+- Mobile-friendly camera interface
+- Process text directly from camera feed
 
-### Contact & Support
-- Easy-to-use contact form
-- Multiple contact methods (phone, email, address)
-- Social media integration
-- Responsive customer support
+### User Management & History
+- Secure user registration and authentication
+- Personal transliteration history tracking
+- Save and manage frequently used translations
+- User profile customization
 
 ## Desktop Integration
 
@@ -149,7 +156,7 @@ transliterateAPP/
    - Right-click on `start-app.bat`
    - Select "Create shortcut"
    - Move shortcut to Desktop
-   - Rename to "Jharkhand Tourism"
+   - Rename to "Transliterate Bharat"
 
 ### Launching the App
 - Double-click the desktop icon
@@ -162,32 +169,32 @@ transliterateAPP/
 Create a `.env` file in the `server` directory:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/jharkhandTourism
+MONGODB_URI=mongodb://localhost:27017/transliterateBharat
 NODE_ENV=development
 ```
 
 ### Customization
 - **Colors & Themes**: Edit `client/src/App.css`
-- **Tourist Places**: Modify `server/routes/places.js`
-- **Experiences**: Update `server/routes/tourism.js`
-- **Images**: Replace image URLs with local assets
+- **Transliteration Logic**: Modify `server/utils/transliterator.js`
+- **Supported Languages**: Update `client/src/utils/translations.js`
+- **UI Components**: Customize components in `client/src/components/`
 
 ## Highlights
 
 ### Completely Free
 - No paid features or premium subscriptions
-- All tourist information and experiences are free
+- All transliteration services are completely free
 - No hidden costs or charges
 
-### Beautiful Design
-- Modern, responsive UI matching the provided design
-- Stunning hero section with statistics
-- Professional color scheme and typography
-- Mobile-friendly interface
+### Advanced Technology
+- Modern React-based user interface
+- Real-time transliteration processing
+- Advanced OCR for image text recognition
+- Mobile-responsive design
 
 ### Fast Performance
 - Optimized React components
-- Efficient API endpoints
+- Efficient transliteration algorithms
 - Minimal loading times
 - Smooth user experience
 
@@ -198,7 +205,7 @@ NODE_ENV=development
 
 ## Contributing
 
-We welcome contributions to improve the Jharkhand Tourism App!
+We welcome contributions to improve Transliterate Bharat!
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -213,15 +220,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For support and inquiries:
-- Email: info@jharkhandtourism.gov.in
-- Phone: +91 651 2446441
-- Website: Create an issue in the repository
-- Hours: Monday-Friday, 9:00 AM - 6:00 PM
+- Email: support@transliteratebharat.com
+- GitHub: Create an issue in the repository
+- Documentation: Check the README and code comments
+- Community: Join our discussions in GitHub Issues
 
 ## Acknowledgments
 
-- Jharkhand Tourism Development Corporation
-- Forest Department of Jharkhand
-- Photography contributors
-- Open source community
-- UI/UX design inspiration
+- Indian Language Technology Proliferation and Deployment Centre
+- Ministry of Electronics and Information Technology, Government of India
+- Open source transliteration libraries and contributors
+- React and Node.js communities
+- OCR technology providers
