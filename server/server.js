@@ -14,6 +14,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Import routes
+const transliterationRoutes = require('./routes/transliteration');
+
 // Basic routes for transliteration app
 app.get('/', (req, res) => {
   res.json({
@@ -31,22 +34,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Simple transliteration endpoint
-app.post('/api/transliterate', (req, res) => {
-  const { text, sourceScript, targetScript } = req.body;
-  
-  // Simple mock transliteration (replace with actual logic)
-  res.json({
-    success: true,
-    originalText: text,
-    transliteratedText: `[${targetScript}] ${text}`,
-    sourceScript,
-    targetScript,
-    timestamp: new Date().toISOString()
-  });
-});
+// Use routes
+app.use('/api/transliterate', transliterationRoutes);
 
-// Simple user registration endpoint
+// Simple user registration endpoint (mock for now)
 app.post('/api/users/register', (req, res) => {
   const { username, email, password } = req.body;
   
@@ -59,7 +50,7 @@ app.post('/api/users/register', (req, res) => {
   });
 });
 
-// Simple user login endpoint
+// Simple user login endpoint (mock for now)
 app.post('/api/users/login', (req, res) => {
   const { email, password } = req.body;
   
@@ -72,7 +63,7 @@ app.post('/api/users/login', (req, res) => {
   });
 });
 
-// Get user profile
+// Get user profile (mock for now)
 app.get('/api/users/me', (req, res) => {
   res.json({
     success: true,

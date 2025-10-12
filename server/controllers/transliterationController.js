@@ -1,7 +1,10 @@
-const TransliterationHistory = require('../models/TransliterationHistory');
+// const TransliterationHistory = require('../models/TransliterationHistory');
 const fs = require('fs');
 const path = require('path');
 const transliterator = require('../utils/transliterator');
+
+// In-memory storage for demo purposes (replace with database in production)
+let transliterationHistory = [];
 
 // @desc    Transliterate text
 // @route   POST /api/transliterate
@@ -17,17 +20,20 @@ exports.transliterate = async (req, res) => {
     // Use the transliterator utility
     const transliteratedText = transliterator.transliterate(text, fromScript, toScript);
     
-    // Save to history if user is authenticated
+    // Save to history if user is authenticated (in-memory for demo)
     if (req.user) {
-      const history = new TransliterationHistory({
+      const historyItem = {
+        id: Date.now().toString(),
         userId: req.user.id,
         originalText: text,
         transliteratedText,
         fromScript,
-        toScript
-      });
+        toScript,
+        date: new Date(),
+        isFromImage: false
+      };
       
-      await history.save();
+      transliterationHistory.push(historyItem);
     }
     
     res.json({ originalText: text, transliteratedText, fromScript, toScript });
@@ -40,10 +46,11 @@ exports.transliterate = async (req, res) => {
 // Get user's transliteration history
 exports.getHistory = async (req, res) => {
   try {
-    const history = await TransliterationHistory.find({ userId: req.user.id })
-      .sort({ date: -1 });
+    const userHistory = transliterationHistory
+      .filter(item => item.userId === req.user.id)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    res.json(history);
+    res.json(userHistory);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -80,18 +87,20 @@ exports.processImage = async (req, res) => {
     // Transliterate the extracted text
     const transliteratedText = transliterator.transliterate(extractedText, fromScript, toScript);
     
-    // Save to history if user is authenticated
+    // Save to history if user is authenticated (in-memory for demo)
     if (req.user) {
-      const history = new TransliterationHistory({
+      const historyItem = {
+        id: Date.now().toString(),
         userId: req.user.id,
         originalText: extractedText,
         transliteratedText,
         fromScript,
         toScript,
+        date: new Date(),
         isFromImage: true
-      });
+      };
       
-      await history.save();
+      transliterationHistory.push(historyItem);
     }
     
     // Delete the temporary file
@@ -112,18 +121,15 @@ exports.processImage = async (req, res) => {
 // Delete a history item
 exports.deleteHistoryItem = async (req, res) => {
   try {
-    const history = await TransliterationHistory.findById(req.params.id);
+    const itemIndex = transliterationHistory.findIndex(
+      item => item.id === req.params.id && item.userId === req.user.id
+    );
     
-    if (!history) {
+    if (itemIndex === -1) {
       return res.status(404).json({ msg: 'History item not found' });
     }
     
-    // Check if the history item belongs to the user
-    if (history.userId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
-    }
-    
-    await history.remove();
+    transliterationHistory.splice(itemIndex, 1);
     
     res.json({ msg: 'History item removed' });
   } catch (err) {

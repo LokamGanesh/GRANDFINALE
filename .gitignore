@@ -32,7 +32,7 @@ Thumbs.db
 
 # IDE files
 .vscode/
-.idea/
+.idea/w
 *.sublime-*
 *.code-workspace
 
