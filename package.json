@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
+    "start:https": "concurrently \"npm run server\" \"npm run client:https\"",
     "server": "cd server && npm start",
     "client": "cd client && npm start",
+    "client:https": "cd client && npm run start:https-win",
     "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
     "server:dev": "cd server && npm run dev",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        video {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 10px;
+            background: #000;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+            padding: 10px;
+            background: #ffe6e6;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+            padding: 10px;
+            background: #e6ffe6;
+            border-radius: 5px;
+        }
+        .info {
+            color: #333;
+            margin: 10px 0;
+            padding: 10px;
+            background: #e6f3ff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Mobile Camera Test</h1>
+        <p>Test camera functionality on your mobile device</p>
+        
+        <div id="status" class="info">Click "Test Camera" to start</div>
+        
+        <div>
+            <button id="testCamera">Test Camera</button>
+            <button id="stopCamera" disabled>Stop Camera</button>
+        </div>
+        
+        <video id="video" autoplay playsinline muted style="display: none;"></video>
+        
+        <div id="cameraInfo"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const testBtn = document.getElementById('testCamera');
+        const stopBtn = document.getElementById('stopCamera');
+        const status = document.getElementById('status');
+        const cameraInfo = document.getElementById('cameraInfo');
+        
+        let currentStream = null;
+
+        function updateStatus(message, type = 'info') {
+            status.className = type;
+            status.innerHTML = message;
+        }
+
+        function updateCameraInfo(stream) {
+            if (stream && stream.getVideoTracks().length > 0) {
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                cameraInfo.innerHTML = `
+                    <div class="success">
+                        <strong>Camera Info:</strong><br>
+                        Resolution: ${settings.width}x${settings.height}<br>
+                        Facing Mode: ${settings.facingMode || 'unknown'}<br>
+                        Device ID: ${settings.deviceId ? 'Available' : 'Not available'}
+                    </div>
+                `;
+            }
+        }
+
+        async function testCamera() {
+            updateStatus('🔍 Testing camera access...', 'info');
+            testBtn.disabled = true;
+            
+            try {
+                // Check if mediaDevices is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera API not supported in this browser');
+                }
+
+                // Try different camera configurations
+                const configs = [
+                    // Back camera (preferred for mobile)
+                    {
+                        video: {
+                            facingMode: 'environment',
+                            width: { min: 640, ideal: 1280, max: 1920 },
+                            height: { min: 480, ideal: 720, max: 1080 }
+                        }
+                    },
+                    // Any camera with constraints
+                    {
+                        video: {
+                            width: { min: 640, ideal: 1280 },
+                            height: { min: 480, ideal: 720 }
+                        }
+                    },
+                    // Basic camera access
+                    {
+                        video: true
+                    }
+                ];
+
+                let stream = null;
+                let configUsed = -1;
+
+                for (let i = 0; i < configs.length; i++) {
+                    try {
+                        updateStatus(`🔄 Trying camera configuration ${i + 1}...`, 'info');
+                        stream = await navigator.mediaDevices.getUserMedia(configs[i]);
+                        configUsed = i;
+                        break;
+                    } catch (err) {
+                        console.log(`Config ${i + 1} failed:`, err);
+                        if (i === configs.length - 1) {
+                            throw err;
+                        }
+                    }
+                }
+
+                if (stream) {
+                    currentStream = stream;
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    
+                    updateStatus(`✅ Camera working! Using configuration ${configUsed + 1}`, 'success');
+                    updateCameraInfo(stream);
+                    
+                    testBtn.disabled = false;
+                    stopBtn.disabled = false;
+                } else {
+                    throw new Error('No camera stream obtained');
+                }
+
+            } catch (err) {
+                console.error('Camera error:', err);
+                let errorMessage = '❌ Camera access failed: ';
+                
+                if (err.name === 'NotAllowedError') {
+                    errorMessage += 'Permission denied. Please allow camera access and try again.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage += 'No camera found on this device.';
+                } else if (err.name === 'NotSupportedError') {
+                    errorMessage += 'Camera not supported. Try using HTTPS or a different browser.';
+                } else if (err.name === 'NotReadableError') {
+                    errorMessage += 'Camera is being used by another application.';
+                } else {
+                    errorMessage += err.message;
+                }
+                
+                updateStatus(errorMessage, 'error');
+                testBtn.disabled = false;
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+                video.srcObject = null;
+                video.style.display = 'none';
+                cameraInfo.innerHTML = '';
+                updateStatus('📷 Camera stopped', 'info');
+                stopBtn.disabled = true;
+            }
+        }
+
+        testBtn.addEventListener('click', testCamera);
+        stopBtn.addEventListener('click', stopCamera);
+
+        // Auto-test on mobile devices
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            updateStatus('📱 Mobile device detected. Testing camera automatically...', 'info');
+            setTimeout(testCamera, 1000);
+        }
+    </script>
+</body>
+</html>

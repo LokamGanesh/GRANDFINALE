@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <h2>Generating App Icons...</h2>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="status">Processing...</div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sizes = [16, 32, 48, 64, 128, 192, 256, 512];
+        
+        // Load SVG and convert to different sizes
+        fetch('./client/public/icon.svg')
+            .then(response => response.text())
+            .then(svgText => {
+                const img = new Image();
+                const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                img.onload = function() {
+                    sizes.forEach(size => {
+                        canvas.width = size;
+                        canvas.height = size;
+                        ctx.clearRect(0, 0, size, size);
+                        ctx.drawImage(img, 0, 0, size, size);
+                        
+                        canvas.toBlob(blob => {
+                            const link = document.createElement('a');
+                            link.download = `icon-${size}x${size}.png`;
+                            link.href = URL.createObjectURL(blob);
+                            link.click();
+                        }, 'image/png');
+                    });
+                    
+                    document.getElementById('status').innerHTML = 'Icons generated! Check your downloads.';
+                };
+                
+                img.src = url;
+            });
+    </script>
+</body>
+</html>

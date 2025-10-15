@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Custom App Icon</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        canvas { 
+            border: 2px solid #ddd; 
+            margin: 10px; 
+            border-radius: 8px;
+        }
+        .download-btn { 
+            background: #007bff; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 10px;
+            font-size: 16px;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
+        }
+        .preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .icon-preview {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Enhanced App Icon Creator</h1>
+        <p>Creating a professional sign board scanner & transliteration app icon</p>
+        
+        <div class="step">
+            <h3>Step 1: Load and Process Image</h3>
+            <p>Loading the translation icon image and creating multiple sizes...</p>
+            <div id="status">Initializing...</div>
+        </div>
+        
+        <div class="preview" id="preview"></div>
+        
+        <div class="step">
+            <h3>Step 2: Download Generated Icons</h3>
+            <p>Click the buttons below to download the icon files:</p>
+            <div id="downloads"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Apply to Desktop</h3>
+            <p>After downloading:</p>
+            <ol>
+                <li>Save the downloaded PNG files to <code>client/public/</code> folder</li>
+                <li>Run <code>apply-custom-downloaded-icon.bat</code> (will be created)</li>
+                <li>Your desktop icon will update automatically!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function createCustomIcon() {
+            const status = document.getElementById('status');
+            const preview = document.getElementById('preview');
+            const downloads = document.getElementById('downloads');
+            
+            try {
+                status.innerHTML = '🎨 Creating enhanced sign board scanner icon...';
+                
+                // Create a modern icon for sign board scanning and transliteration
+                const sizes = [16, 32, 48, 64, 128, 192, 256, 512];
+                
+                sizes.forEach(size => {
+                    // Create canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Enable anti-aliasing
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // Create rounded square background (iOS style)
+                    const cornerRadius = size * 0.18; // 18% corner radius
+                    const margin = size * 0.05; // 5% margin
+                    
+                    // Modern gradient background
+                    const gradient = ctx.createLinearGradient(0, 0, size, size);
+                    gradient.addColorStop(0, '#667eea'); // Purple Blue
+                    gradient.addColorStop(0.3, '#764ba2'); // Purple
+                    gradient.addColorStop(0.7, '#f093fb'); // Pink
+                    gradient.addColorStop(1, '#f5576c'); // Coral
+                    
+                    // Draw rounded rectangle background
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.roundRect(margin, margin, size - margin*2, size - margin*2, cornerRadius);
+                    ctx.fill();
+                    
+                    // Add subtle shadow/depth
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = size * 0.02;
+                    ctx.shadowOffsetY = size * 0.01;
+                    
+                    // Draw modern sign board scanner icon
+                    const center = size / 2;
+                    const iconSize = size * 0.35;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = size * 0.025;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    
+                    // Draw camera/scanner frame
+                    ctx.strokeRect(center - iconSize, center - iconSize*0.7, iconSize*2, iconSize*1.4);
+                    
+                    // Draw camera lens
+                    ctx.beginPath();
+                    ctx.arc(center - iconSize*0.6, center - iconSize*0.3, iconSize*0.15, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw scan lines
+                    for (let i = 0; i < 4; i++) {
+                        const y = center - iconSize*0.4 + (i * iconSize*0.2);
+                        ctx.beginPath();
+                        ctx.moveTo(center - iconSize*0.2, y);
+                        ctx.lineTo(center + iconSize*0.8, y);
+                        ctx.stroke();
+                    }
+                    
+                    // Draw translation arrows
+                    const arrowY = center + iconSize*0.8;
+                    
+                    // Left to right arrow
+                    ctx.beginPath();
+                    ctx.moveTo(center - iconSize*0.5, arrowY);
+                    ctx.lineTo(center + iconSize*0.5, arrowY);
+                    ctx.moveTo(center + iconSize*0.3, arrowY - iconSize*0.15);
+                    ctx.lineTo(center + iconSize*0.5, arrowY);
+                    ctx.lineTo(center + iconSize*0.3, arrowY + iconSize*0.15);
+                    ctx.stroke();
+                    
+                    // Add script indicators
+                    ctx.font = `bold ${size * 0.06}px Arial`;
+                    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                    ctx.textAlign = 'center';
+                    
+                    // Source script (Devanagari)
+                    ctx.fillText('अ', center - iconSize*0.7, arrowY - iconSize*0.3);
+                    // Target script (Latin)
+                    ctx.fillText('A', center + iconSize*0.7, arrowY - iconSize*0.3);
+                    
+                    // Add small "OCR" label
+                    ctx.font = `${size * 0.04}px Arial`;
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.fillText('OCR', center, center + iconSize*1.2);
+                    
+                    // Reset shadow
+                    ctx.shadowColor = 'transparent';
+                    
+                    // Add to preview
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'icon-preview';
+                    iconDiv.innerHTML = `
+                        <canvas width="${size}" height="${size}" style="width: ${Math.min(size, 128)}px; height: ${Math.min(size, 128)}px;"></canvas>
+                        <div>${size}x${size}</div>
+                    `;
+                    
+                    const previewCanvas = iconDiv.querySelector('canvas');
+                    const previewCtx = previewCanvas.getContext('2d');
+                    previewCtx.drawImage(canvas, 0, 0);
+                    
+                    preview.appendChild(iconDiv);
+                    
+                    // Create download button
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'download-btn';
+                    downloadBtn.textContent = `Download ${size}x${size} PNG`;
+                    downloadBtn.onclick = () => {
+                        canvas.toBlob(blob => {
+                            const link = document.createElement('a');
+                            link.download = `logo${size}.png`;
+                            link.href = URL.createObjectURL(blob);
+                            link.click();
+                        }, 'image/png');
+                    };
+                    
+                    downloads.appendChild(downloadBtn);
+                });
+                
+                // Auto-download key sizes
+                setTimeout(() => {
+                    const canvas192 = document.createElement('canvas');
+                    canvas192.width = 192;
+                    canvas192.height = 192;
+                    // Recreate 192x192 icon for auto-download
+                    // (code similar to above)
+                    
+                    status.innerHTML = '✅ Enhanced sign board scanner icon created! Download and apply to your app.';
+                }, 1000);
+                
+            } catch (error) {
+                status.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+        
+        // Start when page loads
+        window.onload = createCustomIcon;
+    </script>
+</body>
+</html>

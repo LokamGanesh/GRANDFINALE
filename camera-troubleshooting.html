@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Camera Troubleshooting Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background: #5a67d8;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .test-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        #cameraTest {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: none;
+        }
+        .device-info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Camera Access Troubleshooting</h1>
+        
+        <div class="info step">
+            <h3>🔍 Current Status</h3>
+            <p><strong>Your URL:</strong> <span id="currentUrl"></span></p>
+            <p><strong>Connection:</strong> <span id="connectionType"></span></p>
+            <p><strong>Browser:</strong> <span id="browserInfo"></span></p>
+            <p><strong>Device:</strong> <span id="deviceInfo"></span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎥 Quick Camera Test</h3>
+            <button class="button" onclick="testCamera()">Test Camera Access</button>
+            <button class="button" onclick="stopCamera()" style="background: #dc3545;">Stop Camera</button>
+            <video id="cameraTest" autoplay playsinline muted></video>
+            <div id="testResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>🔧 Step 1: Check Connection Security</h3>
+            <p>Camera access requires a secure connection (HTTPS) or localhost.</p>
+            <ul>
+                <li><strong>✅ Works:</strong> https://yoursite.com, http://localhost:3000, http://127.0.0.1:3000</li>
+                <li><strong>❌ Blocked:</strong> http://192.168.x.x:3000 (your current setup)</li>
+            </ul>
+            <div class="warning">
+                <strong>Solution:</strong> Your current IP-based access may be blocked by browser security. Try:
+                <ul>
+                    <li>Use localhost on the same computer</li>
+                    <li>Set up HTTPS (advanced)</li>
+                    <li>Use Chrome with --unsafely-treat-insecure-origin-as-secure flag</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>📱 Step 2: Mobile Browser Settings</h3>
+            <p>Different mobile browsers handle camera permissions differently:</p>
+            
+            <h4>🌐 Chrome Mobile:</h4>
+            <ul>
+                <li>Go to Chrome Settings → Site Settings → Camera</li>
+                <li>Make sure "Ask before accessing" is enabled</li>
+                <li>Check if your site is blocked</li>
+            </ul>
+
+            <h4>🦊 Firefox Mobile:</h4>
+            <ul>
+                <li>Tap the lock icon in address bar</li>
+                <li>Enable camera permissions</li>
+                <li>Refresh the page</li>
+            </ul>
+
+            <h4>📱 Safari iOS:</h4>
+            <ul>
+                <li>Settings → Safari → Camera → Allow</li>
+                <li>Settings → Privacy & Security → Camera → Safari</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>🔄 Step 3: Clear Browser Data</h3>
+            <p>Sometimes cached permissions cause issues:</p>
+            <ul>
+                <li>Clear browser cache and cookies</li>
+                <li>Close and reopen browser</li>
+                <li>Try incognito/private mode</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>🌐 Step 4: Try Different Browsers</h3>
+            <p>Test camera access in different browsers:</p>
+            <ul>
+                <li><strong>Chrome:</strong> Usually best camera support</li>
+                <li><strong>Firefox:</strong> Good alternative</li>
+                <li><strong>Safari:</strong> iOS only, requires HTTPS</li>
+                <li><strong>Edge:</strong> Similar to Chrome</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>🔒 Step 5: Check System Permissions</h3>
+            
+            <h4>Android:</h4>
+            <ul>
+                <li>Settings → Apps → [Browser] → Permissions → Camera</li>
+                <li>Make sure camera permission is enabled</li>
+            </ul>
+
+            <h4>iOS:</h4>
+            <ul>
+                <li>Settings → Privacy & Security → Camera</li>
+                <li>Enable camera for your browser</li>
+            </ul>
+        </div>
+
+        <div class="success step">
+            <h3>✅ Recommended Solutions</h3>
+            <ol>
+                <li><strong>Use Upload Instead:</strong> The upload image feature works without camera permissions</li>
+                <li><strong>Access via Computer:</strong> Use http://localhost:3000 on the same computer</li>
+                <li><strong>HTTPS Setup:</strong> Set up SSL certificate for secure mobile access</li>
+                <li><strong>Different Browser:</strong> Try Chrome mobile with camera permissions enabled</li>
+            </ol>
+        </div>
+
+        <div class="info step">
+            <h3>📞 Still Need Help?</h3>
+            <p>If camera still doesn't work:</p>
+            <ul>
+                <li>✅ <strong>Upload Image</strong> feature works perfectly</li>
+                <li>✅ All OCR and transliteration features are available</li>
+                <li>✅ You can take photos with your camera app and upload them</li>
+            </ul>
+            <a href="javascript:history.back()" class="button">← Back to App</a>
+        </div>
+    </div>
+
+    <script>
+        // Display current environment info
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('connectionType').textContent = window.location.protocol === 'https:' ? 
+            '🔒 Secure (HTTPS)' : '⚠️ Insecure (HTTP)';
+        document.getElementById('browserInfo').textContent = navigator.userAgent.split(' ').pop();
+        document.getElementById('deviceInfo').textContent = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 
+            '📱 Mobile Device' : '💻 Desktop';
+
+        let currentStream = null;
+
+        async function testCamera() {
+            const video = document.getElementById('cameraTest');
+            const result = document.getElementById('testResult');
+            
+            result.innerHTML = '<p>🔄 Testing camera access...</p>';
+            
+            try {
+                // Check if camera API is available
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera API not supported in this browser');
+                }
+
+                // Try to access camera
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+
+                currentStream = stream;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                result.innerHTML = `
+                    <div class="success" style="margin-top: 15px;">
+                        <h4>✅ Camera Working!</h4>
+                        <p>Camera access successful. Your camera should work in the main app.</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Camera test error:', error);
+                let errorMsg = '';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = `
+                        <div class="error" style="margin-top: 15px;">
+                            <h4>🚫 Permission Denied</h4>
+                            <p>Camera access was blocked. Please:</p>
+                            <ul>
+                                <li>Click the camera icon in your browser's address bar</li>
+                                <li>Select "Allow" for camera access</li>
+                                <li>Refresh the page and try again</li>
+                            </ul>
+                        </div>
+                    `;
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg = `
+                        <div class="error" style="margin-top: 15px;">
+                            <h4>📷 No Camera Found</h4>
+                            <p>No camera detected on this device. Use the upload feature instead.</p>
+                        </div>
+                    `;
+                } else if (error.name === 'NotSupportedError') {
+                    errorMsg = `
+                        <div class="warning" style="margin-top: 15px;">
+                            <h4>⚠️ Not Supported</h4>
+                            <p>Camera not supported. This usually means:</p>
+                            <ul>
+                                <li>You need HTTPS connection</li>
+                                <li>Browser doesn't support camera API</li>
+                                <li>Try a different browser</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    errorMsg = `
+                        <div class="error" style="margin-top: 15px;">
+                            <h4>❌ Camera Error</h4>
+                            <p>Error: ${error.message}</p>
+                            <p>Please use the upload image feature instead.</p>
+                        </div>
+                    `;
+                }
+                
+                result.innerHTML = errorMsg;
+            }
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('cameraTest');
+            const result = document.getElementById('testResult');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+                video.srcObject = null;
+                video.style.display = 'none';
+                result.innerHTML = '<p>📷 Camera stopped</p>';
+            }
+        }
+
+        // Auto-test on mobile
+        if (/Mobile|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            setTimeout(() => {
+                document.querySelector('.test-section').scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate New App Icon</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .download-btn { 
+            background: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Generating New App Icon</h2>
+    <div id="status">Loading SVG...</div>
+    
+    <canvas id="canvas192" width="192" height="192" style="display: none;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="display: none;"></canvas>
+    
+    <div id="downloads"></div>
+    
+    <script>
+        async function generateIcons() {
+            try {
+                // Load the SVG
+                const response = await fetch('./client/public/icon.svg');
+                const svgText = await response.text();
+                
+                document.getElementById('status').innerHTML = 'SVG loaded, generating icons...';
+                
+                // Create image from SVG
+                const img = new Image();
+                const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                img.onload = function() {
+                    // Generate 192x192
+                    const canvas192 = document.getElementById('canvas192');
+                    const ctx192 = canvas192.getContext('2d');
+                    ctx192.clearRect(0, 0, 192, 192);
+                    ctx192.drawImage(img, 0, 0, 192, 192);
+                    
+                    // Generate 512x512
+                    const canvas512 = document.getElementById('canvas512');
+                    const ctx512 = canvas512.getContext('2d');
+                    ctx512.clearRect(0, 0, 512, 512);
+                    ctx512.drawImage(img, 0, 0, 512, 512);
+                    
+                    // Create download links
+                    const downloads = document.getElementById('downloads');
+                    
+                    // 192x192 download
+                    canvas192.toBlob(blob => {
+                        const link192 = document.createElement('a');
+                        link192.download = 'logo192.png';
+                        link192.href = URL.createObjectURL(blob);
+                        link192.className = 'download-btn';
+                        link192.textContent = 'Download 192x192 PNG';
+                        downloads.appendChild(link192);
+                    }, 'image/png');
+                    
+                    // 512x512 download
+                    canvas512.toBlob(blob => {
+                        const link512 = document.createElement('a');
+                        link512.download = 'logo512.png';
+                        link512.href = URL.createObjectURL(blob);
+                        link512.className = 'download-btn';
+                        link512.textContent = 'Download 512x512 PNG';
+                        downloads.appendChild(link512);
+                    }, 'image/png');
+                    
+                    document.getElementById('status').innerHTML = 'Icons generated! Click buttons to download.';
+                    
+                    // Auto-download both files
+                    setTimeout(() => {
+                        canvas192.toBlob(blob => {
+                            const a = document.createElement('a');
+                            a.download = 'logo192.png';
+                            a.href = URL.createObjectURL(blob);
+                            a.click();
+                        }, 'image/png');
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        canvas512.toBlob(blob => {
+                            const a = document.createElement('a');
+                            a.download = 'logo512.png';
+                            a.href = URL.createObjectURL(blob);
+                            a.click();
+                        }, 'image/png');
+                    }, 2000);
+                };
+                
+                img.src = url;
+                
+            } catch (error) {
+                document.getElementById('status').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        // Start generation when page loads
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>

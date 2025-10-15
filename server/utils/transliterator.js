@@ -826,7 +826,11 @@ const performOCR = async (imageBuffer, language = 'eng') => {
     const result = await Tesseract.recognize(
       imageBuffer,
       language,
-      { logger: m => console.log(m) }
+      { 
+        logger: m => console.log(m),
+        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
+        tessedit_char_whitelist: undefined // Allow all characters
+      }
     );
     
     return result.data.text;
@@ -834,6 +838,174 @@ const performOCR = async (imageBuffer, language = 'eng') => {
     console.error('OCR Error:', error);
     throw new Error('Failed to perform OCR on the image');
   }
+};
+
+/**
+ * Enhanced OCR specifically optimized for sign boards and street signs
+ * @param {Buffer} imageBuffer - The image buffer
+ * @param {string} language - The language code for OCR
+ * @param {Object} options - OCR options including sign board specific settings
+ * @returns {Promise<Object>} - Object containing text and confidence
+ */
+const performEnhancedOCR = async (imageBuffer, language = 'eng', options = {}) => {
+  try {
+    console.log(`Performing enhanced OCR for sign board with language: ${language}`);
+    
+    const { isSignBoard = false, fromScript = 'latin' } = options;
+    
+    // Enhanced OCR settings for sign boards
+    const ocrOptions = {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+        }
+      },
+      // Page segmentation mode - treat image as single text block
+      tessedit_pageseg_mode: isSignBoard ? Tesseract.PSM.SINGLE_BLOCK : Tesseract.PSM.AUTO,
+      // OCR Engine mode - use LSTM neural network
+      tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
+      // Preserve interword spaces
+      preserve_interword_spaces: '1'
+    };
+    
+    // Add script-specific character whitelisting for better accuracy
+    if (isSignBoard) {
+      const whitelist = getCharacterWhitelist(fromScript);
+      if (whitelist) {
+        ocrOptions.tessedit_char_whitelist = whitelist;
+      }
+    }
+    
+    const result = await Tesseract.recognize(
+      imageBuffer,
+      language,
+      ocrOptions
+    );
+    
+    const extractedText = result.data.text.trim();
+    const confidence = result.data.confidence;
+    
+    console.log(`OCR completed with confidence: ${confidence}%`);
+    console.log(`Extracted text: "${extractedText}"`);
+    
+    return {
+      text: extractedText,
+      confidence: confidence,
+      words: result.data.words || [],
+      lines: result.data.lines || []
+    };
+  } catch (error) {
+    console.error('Enhanced OCR Error:', error);
+    throw new Error(`Failed to perform enhanced OCR: ${error.message}`);
+  }
+};
+
+/**
+ * Get character whitelist for specific scripts to improve OCR accuracy
+ * @param {string} script - The script name
+ * @returns {string|null} - Character whitelist or null
+ */
+const getCharacterWhitelist = (script) => {
+  const whitelists = {
+    'devanagari': 'अआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहक्षज्ञ०१२३४५६७८९।॥ं्ःँ',
+    'bengali': 'অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়০১২৩৪৫৆৭৮৯।',
+    'tamil': 'அஆஇஈஉஊஎஏஐஒஓஔகஙசஞடணதநபமயரலவழளறன௦௧௨௩௪௫௬௭௮௯।',
+    'telugu': 'అఆఇఈఉఊఋఎఏఐఒఓఔకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహళ౦౧౨౩౪౫౬౭౮౯।',
+    'gujarati': 'અઆઇઈઉઊઋએઐઓઔકખગઘઙચછજઝઞટઠડઢણતથદધનપફબભમયરલવશષસહળ૦૧૨૩૪૫૬૭૮૯।',
+    'kannada': 'ಅಆಇಈಉಊಋಎಏಐಒಓಔಕಖಗಘಙಚಛಜಝಞಟಠಡಢಣತಥದಧನಪಫಬಭಮಯರಲವಶಷಸಹಳ೦೧೨೩೪೫೬೭೮೯।',
+    'malayalam': 'അആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹളഴറ।',
+    'odia': 'ଅଆଇଈଉଊଋଏଐଓଔକଖଗଘଙଚଛଜଝଞଟଠଡଢଣତଥଦଧନପଫବଭମଯରଲଵଶଷସହଳ୦୧୨୩୪୫୬୭୮୯।',
+    'gurmukhi': 'ਅਆਇਈਉਊਏਐਓਔਕਖਗਘਙਚਛਜਝਞਟਠਡਢਣਤਥਦਧਨਪਫਬਭਮਯਰਲਵਸ਼ਸਹਲ਼।',
+    'latin': 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,!?;:"\'-()[]{}/@#$%^&*+=<>|\\~`'
+  };
+  
+  return whitelists[script] || null;
+};
+
+/**
+ * Clean and preprocess extracted text for better transliteration
+ * @param {string} text - Raw extracted text
+ * @param {string} script - Source script
+ * @returns {string} - Cleaned text
+ */
+const cleanExtractedText = (text, script) => {
+  if (!text) return '';
+  
+  let cleaned = text
+    // Remove excessive whitespace
+    .replace(/\s+/g, ' ')
+    // Remove common OCR artifacts
+    .replace(/[|\\]/g, '')
+    // Remove isolated punctuation that might be OCR errors
+    .replace(/\s+[.,;:!?]\s+/g, ' ')
+    // Trim whitespace
+    .trim();
+  
+  // Script-specific cleaning
+  if (script === 'devanagari') {
+    // Remove standalone virama that might be OCR errors
+    cleaned = cleaned.replace(/\s्\s/g, ' ');
+    // Fix common OCR mistakes in Devanagari
+    cleaned = cleaned.replace(/।।/g, '॥'); // Double danda
+  } else if (script === 'latin') {
+    // Fix common English OCR mistakes
+    cleaned = cleaned
+      .replace(/\b0\b/g, 'O') // Zero to O
+      .replace(/\b1\b/g, 'I') // One to I in context
+      .replace(/rn/g, 'm') // Common OCR mistake
+      .replace(/vv/g, 'w'); // Double v to w
+  }
+  
+  return cleaned;
+};
+
+/**
+ * Detect the script of the given text
+ * @param {string} text - Text to analyze
+ * @returns {string} - Detected script name
+ */
+const detectScript = (text) => {
+  if (!text || text.trim().length === 0) {
+    return 'latin';
+  }
+  
+  // Unicode ranges for different scripts
+  const scriptRanges = {
+    'devanagari': /[\u0900-\u097F]/,
+    'bengali': /[\u0980-\u09FF]/,
+    'gujarati': /[\u0A80-\u0AFF]/,
+    'gurmukhi': /[\u0A00-\u0A7F]/,
+    'kannada': /[\u0C80-\u0CFF]/,
+    'malayalam': /[\u0D00-\u0D7F]/,
+    'odia': /[\u0B00-\u0B7F]/,
+    'tamil': /[\u0B80-\u0BFF]/,
+    'telugu': /[\u0C00-\u0C7F]/,
+    'latin': /[a-zA-Z]/
+  };
+  
+  // Count characters for each script
+  const scriptCounts = {};
+  let totalChars = 0;
+  
+  for (const [script, regex] of Object.entries(scriptRanges)) {
+    const matches = text.match(regex);
+    scriptCounts[script] = matches ? matches.length : 0;
+    totalChars += scriptCounts[script];
+  }
+  
+  // Find the script with the highest count
+  let detectedScript = 'latin';
+  let maxCount = 0;
+  
+  for (const [script, count] of Object.entries(scriptCounts)) {
+    if (count > maxCount) {
+      maxCount = count;
+      detectedScript = script;
+    }
+  }
+  
+  // Return detected script if confidence is reasonable
+  return maxCount > 0 ? detectedScript : 'latin';
 };
 
 /**
@@ -884,6 +1056,9 @@ module.exports = {
   transliterate,
   getSupportedScripts,
   performOCR,
+  performEnhancedOCR,
+  cleanExtractedText,
+  detectScript,
   mapScriptToTesseractLang,
   mapToSanscriptScheme
 };
